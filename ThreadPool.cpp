@@ -5,12 +5,13 @@
 #include <unistd.h>
 using namespace std;
 
-ThreadPool::ThreadPool(int min, int max)
+template <typename T>
+ThreadPool<T>::ThreadPool(int min, int max)
 {
 	do 
 	{
 		// ³õÊ¼»¯ÈÎÎñ¶ÓÁĞ
-		taskQ = new TaskQueue;
+		taskQ = new TaskQueue<T>;
 		if (taskQ == nullptr)
 		{
 			cout << "new taskQ fail..." << endl;
@@ -56,7 +57,8 @@ ThreadPool::ThreadPool(int min, int max)
 	if (taskQ)delete taskQ;
 }
 
-ThreadPool::~ThreadPool()
+template <typename T>
+ThreadPool<T>::~ThreadPool()
 {
 	// ¹Ø±ÕÏß³Ì³Ø
 	pthread_mutex_lock(&mutexPool);
@@ -98,7 +100,8 @@ ThreadPool::~ThreadPool()
 	pthread_cond_destroy(&notEmpty);
 }
 
-void ThreadPool::addTask(Task task)  // ÓÉÓÚÈÎÎñ¶ÓÁĞÀàÄÚ²¿µÄaddTaskÒÑ¾­¼Ó»¥³âËø±£³ÖÍ¬²½£¬Òò´ËÕâÀï²»ĞèÒª¼ÓËøÁË
+template <typename T>
+void ThreadPool<T>::addTask(Task<T> task)  // ÓÉÓÚÈÎÎñ¶ÓÁĞÀàÄÚ²¿µÄaddTaskÒÑ¾­¼Ó»¥³âËø±£³ÖÍ¬²½£¬Òò´ËÕâÀï²»ĞèÒª¼ÓËøÁË
 {
 	if (shutdown)
 	{
@@ -113,7 +116,8 @@ void ThreadPool::addTask(Task task)  // ÓÉÓÚÈÎÎñ¶ÓÁĞÀàÄÚ²¿µÄaddTaskÒÑ¾­¼Ó»¥³âËø±
 	pthread_cond_signal(&notEmpty);
 }
 
-int ThreadPool::getBusyNum()
+template <typename T>
+int ThreadPool<T>::getBusyNum()
 {
 	pthread_mutex_lock(&mutexPool);
 	int busyNum = this->busyNum;
@@ -122,7 +126,8 @@ int ThreadPool::getBusyNum()
 	return busyNum;
 }
 
-int ThreadPool::getAliveNum()
+template <typename T>
+int ThreadPool<T>::getAliveNum()
 {
 	pthread_mutex_lock(&mutexPool);
 	int aliveNum = this->liveNum;
@@ -131,7 +136,8 @@ int ThreadPool::getAliveNum()
 	return aliveNum;
 }
 
-void* ThreadPool::worker(void* arg)
+template <typename T>
+void* ThreadPool<T>::worker(void* arg)
 {
 	ThreadPool* pool = static_cast<ThreadPool*> (arg);
 
@@ -166,7 +172,7 @@ void* ThreadPool::worker(void* arg)
 		}
 
 		// ´ÓÈÎÎñ¶ÓÁĞÖĞÈ¡³öÒ»¸öÈÎÎñ
-		Task task = pool->taskQ->takeTask();
+		Task<T> task = pool->taskQ->takeTask();
 		pool->busyNum++;
 		
 		// ½âËø
@@ -188,7 +194,8 @@ void* ThreadPool::worker(void* arg)
 	return nullptr;
 }
 
-void* ThreadPool::manager(void* arg)
+template <typename T>
+void* ThreadPool<T>::manager(void* arg)
 {
 	ThreadPool* pool = static_cast<ThreadPool*> (arg);
 
@@ -246,7 +253,8 @@ void* ThreadPool::manager(void* arg)
 	return nullptr;
 }
 
-void ThreadPool::threadExit()
+template <typename T>
+void ThreadPool<T>::threadExit()
 {
 	pthread_t tid = pthread_self();
 	for (int i = 0; i < maxNum; i++)

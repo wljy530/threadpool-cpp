@@ -1,5 +1,8 @@
 #pragma once
 #include "TaskQueue.h"
+#include "TaskQueue.cpp"
+
+template <typename T>
 class ThreadPool
 {
 public:
@@ -10,7 +13,7 @@ public:
 	~ThreadPool();
 
 	// 给线程池添加任务
-	void addTask(Task task);
+	void addTask(Task<T> task);
 
 	// 获取线程池中工作的线程的个数
 	int getBusyNum();
@@ -29,7 +32,7 @@ private:
 	void threadExit();
 
 private:
-	TaskQueue* taskQ;            // 任务队列
+	TaskQueue<T>* taskQ;            // 任务队列
 	pthread_t managerID;         // 管理者线程ID
 	pthread_t* threadIDs;        // 工作线程ID
 	int minNum;                  // 最小线程数
@@ -44,4 +47,5 @@ private:
 
 	static const int NUMBER = 2; // 管理者线程根据情况一次销毁或者创建两个工作线程
 };
+
 
