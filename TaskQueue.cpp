@@ -1,5 +1,4 @@
 #include "TaskQueue.h"
-#include "ThreadPool.h"
 
 TaskQueue::TaskQueue()
 {
@@ -11,41 +10,11 @@ TaskQueue::~TaskQueue()
 	pthread_mutex_destroy(&m_mutex);
 }
 
-ThreadPool::ThreadPool(int min, int max)
-{
-}
-
-ThreadPool::~ThreadPool()
-{
-}
-
 void TaskQueue::addTask(Task task)
 {
 	pthread_mutex_lock(&m_mutex);
 	m_taskQ.push(task);
 	pthread_mutex_unlock(&m_mutex);
-}
-
-int ThreadPool::getBusyNum()
-{
-	return 0;
-}
-
-int ThreadPool::getAliveNum()
-{
-	return 0;
-}
-
-void ThreadPool::worker(void* arg)
-{
-}
-
-void ThreadPool::manager(void* arg)
-{
-}
-
-void ThreadPool::threadExit()
-{
 }
 
 void TaskQueue::addTask(callback f, void* arg)
